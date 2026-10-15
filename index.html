@@ -3,9 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#eee8e0" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1b1511" media="(prefers-color-scheme: dark)">
-<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F6EFE4">
+<meta name="color-scheme" content="light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Sổ công">
@@ -24,30 +23,19 @@ img{max-width:100%}
 <style>
 /* Layout: sổ công cầm tay. Số thực nhận + mục tiêu ở trên, lịch có tiền từng ngày, thanh tab dưới cùng. */
 :root{
-  --bg:#EEE8E0; --surface:#F8F4EE; --fg:#2E2118; --muted:#7C6B5E; --line:#DAD0C4;
-  --accent:#7B4A2D; --accent-fg:#FFFFFF; --accent-soft:#E3D4C3;
-  --warn:#A8500B; --warn-soft:#F3DFC6; --bad:#B3261E; --bad-soft:#F4DAD4;
+  --bg:#F6EFE4; --surface:#FFFAF2; --fg:#3B2A1E; --muted:#715C4A; --line:#E6D9C6;
+  --accent:#8B5A3C; --accent-fg:#FFFFFF; --accent-soft:#EBD9C2;
+  --warn:#A8500B; --warn-soft:#F7E3CB; --bad:#B3261E; --bad-soft:#F6DDD6;
   --font-display:'Bricolage Grotesque','Be Vietnam Pro',system-ui,sans-serif;
   --font-body:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#1B1511; --surface:#261E19; --fg:#F0E7DD; --muted:#A8998B; --line:#3D332B;
-    --accent:#D9A272; --accent-fg:#2A1A0D; --accent-soft:#3A2C21;
-    --warn:#F0A15C; --warn-soft:#3A2A18; --bad:#FF8F85; --bad-soft:#42211E; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#1B1511; --surface:#261E19; --fg:#F0E7DD; --muted:#A8998B; --line:#3D332B;
-  --accent:#D9A272; --accent-fg:#2A1A0D; --accent-soft:#3A2C21;
-  --warn:#F0A15C; --warn-soft:#3A2A18; --bad:#FF8F85; --bad-soft:#42211E; color-scheme:dark;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--font-body);
   padding-block:0 96px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
   font-variant-numeric:tabular-nums}
 body.multi{padding-block:0 250px}
-.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;min-width:0}
+.wrap{width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px;min-width:0}
 button,input,textarea,select{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -59,6 +47,7 @@ h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance}
 .hero .lab{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .hero .big{font-family:var(--font-display);font-size:clamp(30px,9vw,40px);line-height:1.1;font-weight:700;letter-spacing:-.02em;overflow-wrap:anywhere}
 .hero .sub{font-size:13px;color:var(--muted)}
+.hero .sub b{color:var(--fg);font-weight:700}
 .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
 .bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
 .monthnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -104,7 +93,8 @@ h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance}
 label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);min-width:0}
 input[type=text],input[type=time],input[type=number],input[type=tel],textarea{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--line);background:var(--bg);border-radius:10px;color:var(--fg);min-width:0}
 textarea{min-height:96px;resize:vertical;font-size:13px}
-.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+input[type=file]{width:100%;max-width:100%;min-width:0;font-size:13px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:end}
 .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
@@ -297,15 +287,29 @@ const TABS=[['cal','Lịch công'],['pay','Tiền lương'],['shift','Ca làm'],
 function renderTabs(){
   $('#tabs').innerHTML=TABS.map(t=>'<button class="tab" data-act="tab" data-t="'+t[0]+'"'+(view.tab===t[0]?' aria-current="page"':'')+'>'+ICON[t[0]]+'<span>'+t[1]+'</span></button>').join('');
 }
+function remainDays(p){
+  const n0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let from=S.days[dk(n0)]?new Date(n0.getFullYear(),n0.getMonth(),n0.getDate()+1):n0;
+  const a=parseK(p.a),b=parseK(p.b);
+  if(from<a)from=a;
+  if(from>b)return 0;
+  return Math.round((b-from)/864e5)+1;
+}
+function remainLine(p,left){
+  if(left<=0)return '';
+  const n=remainDays(p);
+  if(!n)return '<span class="sub">Kỳ này đã hết ngày, còn thiếu '+fmt(left)+' so với mục tiêu.</span>';
+  return '<span class="sub"><b>Cần TB '+fmt(left/n)+'/ngày</b> cho '+n+' ngày còn lại</span>';
+}
 function renderHero(){
   if(view.tab!=='cal'&&view.tab!=='pay'){$('#hero').innerHTML='';return}
   const t=totals(view.y,view.m),p=period(view.y,view.m),g=S.settings.goal;
   let goal='';
   if(g>0){
     const pc=Math.max(0,Math.min(100,t.net/g*100));
-    goal='<div class="bar" role="progressbar" aria-valuenow="'+Math.round(pc)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pc+'%"></span></div><span class="sub">'+(t.net>=g?'Đã đạt mục tiêu '+fmt(g):'Đạt '+Math.round(pc)+'% mục tiêu '+fmt(g)+' · còn '+fmt(g-t.net))+'</span>';
+    goal='<div class="bar" role="progressbar" aria-valuenow="'+Math.round(pc)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pc+'%"></span></div><span class="sub">'+(t.net>=g?'Đã đạt mục tiêu '+fmt(g):'Đạt '+Math.round(pc)+'% mục tiêu '+fmt(g)+' · còn '+fmt(g-t.net))+'</span>'+remainLine(p,g-t.net);
   }
-  $('#hero').innerHTML='<div class="hero"><span class="lab">'+(p.custom?'Kỳ lương '+p.label:'Thực nhận dự tính tháng '+(view.m+1)+'/'+view.y)+'</span><span class="big">'+fmt(t.net)+'</span><span class="sub">'+fmtH(t.h)+' · '+t.n+' ngày có công'+(t.n?' · TB '+fmt(t.net/t.n)+'/ngày':'')+'</span>'+goal+'</div>';
+  $('#hero').innerHTML='<div class="hero"><span class="lab">'+(p.custom?'Kỳ lương '+p.label:'Thực nhận dự tính tháng '+(view.m+1)+'/'+view.y)+'</span><span class="big">'+fmt(t.net)+'</span><span class="sub">'+fmtH(t.h)+' · '+t.n+' ngày có công'+(t.n?' · TB '+fmt(t.net/t.n)+'/ngày đã công':'')+'</span>'+goal+'</div>';
 }
 function monthNav(){
   return '<div class="monthnav"><button class="iconbtn" data-act="prev" aria-label="Tháng trước">❮</button><h2>Tháng '+(view.m+1)+'/'+view.y+'</h2><button class="todaybtn" data-act="today">Hôm nay</button><button class="iconbtn" data-act="next" aria-label="Tháng sau">❯</button></div>';
