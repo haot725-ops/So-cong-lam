@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#eee8e0" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1b1511" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
@@ -150,6 +150,18 @@ textarea{min-height:96px;resize:vertical;font-size:13px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));background:var(--fg);color:var(--bg);padding:8px 8px 8px 16px;border-radius:12px;font-size:13px;z-index:20;max-width:92%;display:flex;align-items:center;gap:10px}
 .toast .tb{background:transparent;border:1px solid currentColor;border-radius:8px;min-height:32px;padding:0 10px;font-weight:600;color:inherit}
 @media (prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+<style>
+/* Giống app: khoá zoom, không chọn chữ, không menu bấm giữ, không kéo tải lại */
+html,body{touch-action:pan-x pan-y;overscroll-behavior:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+body{-webkit-font-smoothing:antialiased}
+a,img,svg,button{-webkit-user-drag:none;-webkit-touch-callout:none}
+input,textarea,select{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;font-size:16px;-webkit-appearance:none;appearance:none}
+input[type=checkbox]{-webkit-appearance:auto;appearance:auto}
+input[type=file]{-webkit-user-select:none;user-select:none}
+button,.btn,.chip,.cell,.dayrow,.tab,.iconbtn,.todaybtn{transition:transform .08s ease,opacity .08s ease}
+button:active{transform:scale(.97);opacity:.8}
+.cell:active{transform:scale(.94)}
 </style>
 </head>
 <body>
@@ -617,6 +629,16 @@ $('#view').addEventListener('touchend',e=>{
   if(Math.abs(dx)>70&&Math.abs(dy)<45){if(dx<0)A.next();else A.prev()}
 },{passive:true});
 render();
+})();
+</script>
+<script>
+(function(){
+  var ok=function(t){return t&&t.closest&&t.closest('input,textarea,select')};
+  ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()})});
+  document.addEventListener('contextmenu',function(e){if(!ok(e.target))e.preventDefault()});
+  document.addEventListener('selectstart',function(e){if(!ok(e.target))e.preventDefault()});
+  document.addEventListener('dragstart',function(e){e.preventDefault()});
+  document.addEventListener('wheel',function(e){if(e.ctrlKey)e.preventDefault()},{passive:false});
 })();
 </script>
 </body>
