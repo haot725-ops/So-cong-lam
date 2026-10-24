@@ -48,7 +48,8 @@ h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance}
 .hero .big{font-family:var(--font-display);font-size:clamp(30px,9vw,40px);line-height:1.1;font-weight:700;letter-spacing:-.02em;overflow-wrap:anywhere}
 .hero .sub{font-size:13px;color:var(--muted)}
 .hero .sub b{color:var(--fg);font-weight:700}
-.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;display:flex}
+.bar .pl{opacity:.4}
 .bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
 .monthnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .monthnav h2{font-size:18px;text-align:center;flex:1}
@@ -70,6 +71,8 @@ h1,h2,h3{margin:0;font-family:var(--font-display);text-wrap:balance}
 .cell.has{background:var(--accent-soft);border-color:transparent}
 .cell.has b{color:var(--fg)}
 .cell.today{border:2px solid var(--accent)}
+.cell.plan{background:transparent;border:1px dashed var(--accent)}
+.cell.plan em{color:var(--accent)}
 .cell.out{opacity:.5}
 .cell.sel{outline:3px solid var(--accent);outline-offset:-3px}
 .cell.flag::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--warn)}
@@ -131,7 +134,11 @@ input[type=file]{width:100%;max-width:100%;min-width:0;font-size:13px}
 .panel{background:var(--surface);width:100%;max-width:560px;max-height:92%;border-radius:20px 20px 0 0;display:flex;flex-direction:column;min-height:0}
 .phead{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .phead h2{font-size:18px}
-.pbody{overflow-y:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));min-height:0}
+.pbody{overflow-y:auto;padding:8px 16px 16px;min-height:0;flex:1 1 auto;overscroll-behavior:contain}
+.panel>div>.phead{padding:14px 16px 4px}
+.pfoot{border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;background:var(--surface);border-radius:0}
+.pfoot .preview{padding:8px 12px}
+.pfoot .btns .btn.pri{flex:1}
 .pin{display:flex;flex-direction:column;gap:14px}
 .pin h3{font-size:13px;color:var(--muted);font-family:var(--font-body);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .preview{background:var(--accent-soft);border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -139,7 +146,33 @@ input[type=file]{width:100%;max-width:100%;min-width:0;font-size:13px}
 .preview div{display:flex;flex-direction:column;min-width:0}
 .toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(12px + env(safe-area-inset-top,0px));background:var(--fg);color:var(--bg);padding:8px 8px 8px 16px;border-radius:12px;font-size:13px;z-index:20;max-width:92%;display:flex;align-items:center;gap:10px}
 .toast .tb{background:transparent;border:1px solid currentColor;border-radius:8px;min-height:32px;padding:0 10px;font-weight:600;color:inherit}
-@media (prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}}
+
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-top:2px}
+.split>div{background:var(--surface);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;min-width:0}
+.split .k{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.split .v{font-family:var(--font-display);font-weight:700;font-size:17px;overflow-wrap:anywhere;line-height:1.25}
+.split small{font-size:12px;color:var(--muted)}
+.split .plan .v{color:var(--accent)}
+.mini{position:fixed;top:0;left:0;right:0;z-index:4;background:var(--surface);border-bottom:1px solid var(--line);padding:calc(8px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.mini .in{max-width:560px;margin:0 auto;display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.mini strong{font-family:var(--font-display);font-size:17px}
+.mini span{font-size:12px;color:var(--muted)}
+.mini .bar{height:4px;max-width:560px;margin:6px auto 0}
+.tag{display:inline-block;font:600 11px var(--font-body);padding:2px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);vertical-align:middle;margin-left:8px}
+.fold{gap:0}
+.foldhd{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;background:transparent;border:0;padding:0;min-height:28px;text-align:left;color:inherit}
+.foldbody{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.fold .dayrow{background:var(--bg)}
+.chev{display:inline-block;width:9px;height:9px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);margin:0 4px 3px 0;transition:transform .15s}
+[aria-expanded=true]>.chev,[aria-expanded=true] .chev{transform:rotate(-135deg);margin:3px 4px 0 0}
+.advbtn{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;width:100%;padding:0 14px;border:1px solid var(--line);background:var(--bg);border-radius:12px;font-weight:600;text-align:left}
+.advbtn .rt{display:flex;align-items:center;gap:8px}
+.badge{min-width:20px;height:20px;border-radius:99px;background:var(--accent);color:var(--accent-fg);font-size:11px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px}
+textarea.note{min-height:64px}
+.dowrow{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.dowrow .chip{min-height:44px;padding:0;text-align:center;font-size:13px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){.panel{animation:up .18s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}.fade{animation:fade .2s ease-out}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}}
 </style>
 <style>
 /* Giống app: khoá zoom, không chọn chữ, không menu bấm giữ, không kéo tải lại */
@@ -160,9 +193,11 @@ button:active{transform:scale(.97);opacity:.8}
   <div id="hero"></div>
   <main id="view" class="wrap"></main>
 </div>
+<div class="mini" id="mini" hidden></div>
 <div class="multibar" id="multibar" hidden></div>
 <nav class="tabs" aria-label="Điều hướng"><div class="in" id="tabs"></div></nav>
-<div class="overlay" id="sheet" hidden><div class="panel" role="dialog" aria-modal="true" aria-label="Ngày công"><div class="pbody" id="sheetBody"><div class="pin" id="sheetIn"></div></div></div></div>
+<div class="overlay" id="sheet" hidden><div class="panel" role="dialog" aria-modal="true" aria-label="Ngày công"><div id="sheetHead"></div><div class="pbody" id="sheetBody"><div class="pin" id="sheetIn"></div></div><div class="pfoot" id="sheetFoot"></div></div></div>
+<div class="overlay" id="qsheet" hidden><div class="panel" role="dialog" aria-modal="true" aria-label="Xếp lịch nhanh"><div id="qHead"></div><div class="pbody" id="qBody"><div class="pin" id="qIn"></div></div><div class="pfoot" id="qFoot"></div></div></div>
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -177,7 +212,7 @@ const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 const uid=()=>Math.random().toString(36).slice(2,9);
 const money=v=>parseInt(String(v==null?'':v).replace(/[^\d-]/g,''),10)||0;
 const dec=v=>{const n=parseFloat(String(v==null?'':v).replace(',','.'));return isNaN(n)?0:n};
-const now=new Date();
+let now=new Date();
 const DOW=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
 const DOWS=['CN','Th 2','Th 3','Th 4','Th 5','Th 6','Th 7'];
 
@@ -196,6 +231,11 @@ function seed(){
     if(w===1)continue;
     o.days[dkey(y,m,i)]={shiftIds:i%3===0?[a,b]:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:i===5?20000:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
   }
+  for(let i=now.getDate();i<=Math.min(new Date(y,m+1,0).getDate(),now.getDate()+5);i++){
+    const w=new Date(y,m,i).getDay();
+    if(w===1)continue;
+    o.days[dkey(y,m,i)]={shiftIds:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
+  }
   return o;
 }
 function load(){
@@ -207,9 +247,11 @@ function load(){
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storeOK=false}}
 let S=load();
-let view={tab:'cal',y:now.getFullYear(),m:now.getMonth()};
+let view={tab:'cal',y:now.getFullYear(),m:now.getMonth(),fold:{det:true,days:true,wk:false,sh:false,sum:false},anim:false};
+let scrollPos={},heroOn=false,pastHero=false;
 let draft=null,openKey=null,shiftEdit=null,pend={},undoFn=null;
 let multi={on:false,sel:new Set(),ids:[]};
+let qs={ids:[],dows:new Set([1,2,3,4,5]),scope:'rest',over:false};
 
 /* ---------- tính toán ---------- */
 const tmin=t=>{const p=String(t||'0:0').split(':');return (+p[0]||0)*60+(+p[1]||0)};
@@ -236,8 +278,11 @@ function period(y,m){
 }
 function periodKeys(y,m){const p=period(y,m);return Object.keys(S.days).filter(k=>k>=p.a&&k<=p.b).sort()}
 function totals(y,m){
-  const t={h:0,base:0,add:0,bonus:0,late:0,skip:0,ded:0,net:0,n:0};
-  periodKeys(y,m).forEach(k=>{const c=calc(S.days[k]);t.h+=c.h;t.base+=c.base;t.add+=c.ot+c.hol;t.bonus+=c.bonus;t.late+=c.late;t.skip+=c.skip;t.ded+=c.ded;t.net+=c.net;if(c.h>0)t.n++});
+  const z=()=>({h:0,base:0,add:0,bonus:0,late:0,skip:0,ded:0,net:0,n:0});
+  const add=(t,c)=>{t.h+=c.h;t.base+=c.base;t.add+=c.ot+c.hol;t.bonus+=c.bonus;t.late+=c.late;t.skip+=c.skip;t.ded+=c.ded;t.net+=c.net;if(c.h>0)t.n++};
+  const t=z(),dn=z(),pl=z(),tk=dk(now);
+  periodKeys(y,m).forEach(k=>{const c=calc(S.days[k]);add(t,c);add(k<=tk?dn:pl,c)});
+  t.done=dn;t.plan=pl;
   return t;
 }
 const fmt=n=>Math.round(n).toLocaleString('vi-VN')+' '+S.settings.cur;
@@ -266,6 +311,7 @@ function markWords(d){
   return m.length?', '+m.join(', '):'';
 }
 function monday(k){const d=parseK(k);d.setDate(d.getDate()-((d.getDay()+6)%7));return dk(d)}
+const buzz=ms=>{try{if(navigator.vibrate)navigator.vibrate(ms||12)}catch(e){}};
 function toast(t,fn){
   const el=$('#toast');undoFn=fn||null;
   el.innerHTML='<span>'+esc(t)+'</span>'+(fn?'<button class="tb" data-act="undo">Hoàn tác</button>':'');
@@ -289,27 +335,38 @@ function renderTabs(){
 }
 function remainDays(p){
   const n0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-  let from=S.days[dk(n0)]?new Date(n0.getFullYear(),n0.getMonth(),n0.getDate()+1):n0;
   const a=parseK(p.a),b=parseK(p.b);
-  if(from<a)from=a;
-  if(from>b)return 0;
-  return Math.round((b-from)/864e5)+1;
+  const d=new Date(n0<a?a:n0);
+  let n=0;
+  for(;d<=b;d.setDate(d.getDate()+1)){if(!S.days[dk(d)])n++}
+  return n;
 }
 function remainLine(p,left){
   if(left<=0)return '';
+  const n0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  if(parseK(p.b)<n0)return '<span class="sub">Kỳ này đã kết thúc, thiếu '+fmt(left)+' so với mục tiêu.</span>';
   const n=remainDays(p);
-  if(!n)return '<span class="sub">Kỳ này đã hết ngày, còn thiếu '+fmt(left)+' so với mục tiêu.</span>';
-  return '<span class="sub"><b>Cần TB '+fmt(left/n)+'/ngày</b> cho '+n+' ngày còn lại</span>';
+  if(!n)return '<span class="sub">Hết ngày trống, còn thiếu '+fmt(left)+' so với mục tiêu. Thêm ca vào ngày đã xếp nếu muốn bù.</span>';
+  return '<span class="sub"><b>Cần TB '+fmt(left/n)+'/ngày</b> cho '+n+' ngày còn trống</span>';
 }
+function syncMini(){const m=$('#mini');if(m)m.hidden=!(heroOn&&pastHero)}
 function renderHero(){
-  if(view.tab!=='cal'&&view.tab!=='pay'){$('#hero').innerHTML='';return}
-  const t=totals(view.y,view.m),p=period(view.y,view.m),g=S.settings.goal;
-  let goal='';
+  const hero=$('#hero');
+  if(view.tab!=='cal'&&view.tab!=='pay'){hero.innerHTML='';heroOn=false;syncMini();return}
+  const t=totals(view.y,view.m),p=period(view.y,view.m),g=S.settings.goal,dn=t.done,pl=t.plan;
+  let boxes='';
+  if(dn.n)boxes+='<div><span class="k">Đã làm</span><span class="v">'+fmt(dn.net)+'</span><small>'+dn.n+' ngày · TB '+fmt(dn.net/dn.n)+'/ngày</small></div>';
+  if(pl.n)boxes+='<div class="plan"><span class="k">Đã xếp lịch</span><span class="v">'+fmt(pl.net)+'</span><small>'+pl.n+' ngày chưa tới</small></div>';
+  let goal='',pct=0,bar='';
   if(g>0){
-    const pc=Math.max(0,Math.min(100,t.net/g*100));
-    goal='<div class="bar" role="progressbar" aria-valuenow="'+Math.round(pc)+'" aria-valuemin="0" aria-valuemax="100"><span style="width:'+pc+'%"></span></div><span class="sub">'+(t.net>=g?'Đã đạt mục tiêu '+fmt(g):'Đạt '+Math.round(pc)+'% mục tiêu '+fmt(g)+' · còn '+fmt(g-t.net))+'</span>'+remainLine(p,g-t.net);
+    pct=Math.max(0,Math.min(100,t.net/g*100));
+    const dp=Math.max(0,Math.min(100,dn.net/g*100)),pp=Math.max(0,pct-dp);
+    bar='<span style="width:'+dp+'%"></span><span class="pl" style="width:'+pp+'%"></span>';
+    goal='<div class="bar" role="progressbar" aria-valuenow="'+Math.round(pct)+'" aria-valuemin="0" aria-valuemax="100">'+bar+'</div><span class="sub">'+(t.net>=g?'Dự tính đã đạt mục tiêu '+fmt(g):'Dự tính đạt '+Math.round(pct)+'% mục tiêu '+fmt(g)+' · còn '+fmt(g-t.net))+'</span>'+remainLine(p,g-t.net);
   }
-  $('#hero').innerHTML='<div class="hero"><span class="lab">'+(p.custom?'Kỳ lương '+p.label:'Thực nhận dự tính tháng '+(view.m+1)+'/'+view.y)+'</span><span class="big">'+fmt(t.net)+'</span><span class="sub">'+fmtH(t.h)+' · '+t.n+' ngày có công'+(t.n?' · TB '+fmt(t.net/t.n)+'/ngày đã công':'')+'</span>'+goal+'</div>';
+  hero.innerHTML='<div class="hero"><span class="lab">'+(p.custom?'Kỳ lương '+p.label:'Thực nhận dự tính tháng '+(view.m+1)+'/'+view.y)+'</span><span class="big">'+fmt(t.net)+'</span><span class="sub">'+fmtH(t.h)+' · '+t.n+' ngày có lịch</span>'+(boxes?'<div class="split">'+boxes+'</div>':'')+goal+'</div>';
+  $('#mini').innerHTML='<div class="in"><strong>'+fmt(t.net)+'</strong><span>'+(g>0?Math.round(pct)+'% mục tiêu':t.n+' ngày có lịch')+'</span></div>'+(g>0?'<div class="bar">'+bar+'</div>':'');
+  heroOn=true;syncMini();
 }
 function monthNav(){
   return '<div class="monthnav"><button class="iconbtn" data-act="prev" aria-label="Tháng trước">❮</button><h2>Tháng '+(view.m+1)+'/'+view.y+'</h2><button class="todaybtn" data-act="today">Hôm nay</button><button class="iconbtn" data-act="next" aria-label="Tháng sau">❯</button></div>';
@@ -327,23 +384,27 @@ function calView(){
   for(let i=0;i<first;i++)cells+='<span class="cell off"></span>';
   for(let d=1;d<=n;d++){
     const k=dkey(y,m,d),dd=S.days[k],c=dd?calc(dd):null;
-    const cls='cell'+(dd?' has':'')+(k===todayK?' today':'')+(c&&(c.late||c.skip||c.ded)?' flag':'')+(p.custom&&(k<p.a||k>p.b)?' out':'')+(multi.sel.has(k)?' sel':'');
+    const cls='cell'+(dd?' has':'')+(k===todayK?' today':'')+(c&&(c.late||c.skip||c.ded)?' flag':'')+(p.custom&&(k<p.a||k>p.b)?' out':'')+(multi.sel.has(k)?' sel':'')+(dd&&k>todayK?' plan':'');
     let inner='<b>'+d+'</b>';
     if(c)inner+=(c.net===0&&c.h===0?'<em>•</em>':'<em class="'+(c.net<0?'neg':'')+'">'+short(c.net)+'</em><i>'+fmtN(c.h)+'h</i>');
     if(dd){const mk=marks(dd);if(mk)inner+='<span class="mks">'+mk+'</span>'}
-    cells+='<button class="'+cls+'" data-act="day" data-k="'+k+'" aria-label="Ngày '+d+(c?', '+fmt(c.net):'')+(dd?markWords(dd):'')+'">'+inner+'</button>';
+    cells+='<button class="'+cls+'" data-act="day" data-k="'+k+'" aria-label="Ngày '+d+(c?', '+fmt(c.net):'')+(dd?markWords(dd):'')+(dd&&k>todayK?', đã xếp lịch':'')+'">'+inner+'</button>';
   }
   return banners()+monthNav()+
     '<div class="dow"><span>Th 2</span><span>Th 3</span><span>Th 4</span><span>Th 5</span><span>Th 6</span><span>Th 7</span><span>CN</span></div><div class="grid" id="grid">'+cells+'</div>'+
-    '<div class="btns"><button class="btn'+(multi.on?' on':'')+'" data-act="multi">'+(multi.on?'Xong chọn nhiều ngày':'Chọn nhiều ngày')+'</button></div>'+
-    '<p class="hint">Mỗi ô hiện tiền thực nhận của ngày (k = nghìn, tr = triệu) và số giờ. Vuốt trái hoặc phải để đổi tháng. Chấm cam là ngày có phạt, bỏ ca hoặc khoản trừ. Ký hiệu nhỏ dưới ô: <i class="mk nt">N</i> có ghi chú, <i class="mk ex">+</i> ca phát sinh, <i class="mk sub">T</i> ca làm thay.'+(p.custom?' Ngày mờ nằm ngoài kỳ lương '+p.label+'.':'')+'</p>';
+    '<div class="btns"><button class="btn pri" data-act="qp">Xếp lịch nhanh</button><button class="btn'+(multi.on?' on':'')+'" data-act="multi">'+(multi.on?'Xong chọn nhiều ngày':'Chọn nhiều ngày')+'</button></div>'+
+    '<p class="hint">Mỗi ô hiện tiền thực nhận của ngày (k = nghìn, tr = triệu) và số giờ. Vuốt trái hoặc phải để đổi tháng. Ô viền nét đứt là ngày đã xếp lịch, chưa tới. Chấm cam là ngày có phạt, bỏ ca hoặc khoản trừ. Ký hiệu nhỏ dưới ô: <i class="mk nt">N</i> có ghi chú, <i class="mk ex">+</i> ca phát sinh, <i class="mk sub">T</i> ca làm thay.'+(p.custom?' Ngày mờ nằm ngoài kỳ lương '+p.label+'.':'')+'</p>';
+}
+function fold(id,title,body){
+  const o=!!view.fold[id];
+  return '<div class="card fold"><button class="foldhd" data-act="fold" data-id="'+id+'" aria-expanded="'+(o?'true':'false')+'"><h2>'+title+'</h2><span class="chev"></span></button>'+(o?'<div class="foldbody">'+body+'</div>':'')+'</div>';
 }
 function payView(){
-  const t=totals(view.y,view.m),keys=periodKeys(view.y,view.m),p=period(view.y,view.m);
+  const t=totals(view.y,view.m),keys=periodKeys(view.y,view.m),p=period(view.y,view.m),tk=dk(now);
   const row=(l,v,cls)=>'<div class="r"><span>'+l+'</span><span class="'+(cls||'')+'">'+v+'</span></div>';
   const list=keys.length?keys.slice().reverse().map(k=>{
     const c=calc(S.days[k]),d=parseK(k),names=dayShifts(S.days[k]).map(s=>esc(s.name)).join(' + ');
-    return '<button class="dayrow" data-act="day" data-k="'+k+'"><span>'+DOWS[d.getDay()]+' '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'<small>'+fmtH(c.h)+(c.mult!==1?' ×'+fmtN(c.mult):'')+(names?' · '+names:'')+'</small><span style="display:flex;gap:2px;margin-top:4px">'+marks(S.days[k])+'</span></span><strong class="'+(c.net<0?'neg':'')+'">'+fmt(c.net)+'</strong></button>';
+    return '<button class="dayrow" data-act="day" data-k="'+k+'"><span>'+DOWS[d.getDay()]+' '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+(k>tk?'<span class="tag">Dự kiến</span>':'')+'<small>'+fmtH(c.h)+(c.mult!==1?' ×'+fmtN(c.mult):'')+(names?' · '+names:'')+'</small><span style="display:flex;gap:2px;margin-top:4px">'+marks(S.days[k])+'</span></span><strong class="'+(c.net<0?'neg':'')+'">'+fmt(c.net)+'</strong></button>';
   }).join(''):'<p class="hint">Chưa có ngày công nào trong kỳ này.</p>';
   /* theo tuần */
   const wm={};
@@ -358,16 +419,19 @@ function payView(){
   keys.forEach(k=>dayShifts(S.days[k]).forEach(s=>{const x=st[s.name]||(st[s.name]={n:0,h:0});x.n++;x.h+=dur(s)}));
   const sn=Object.keys(st).sort((a,b)=>st[b].h-st[a].h);
   const byShift=sn.length?'<div class="rows">'+sn.map(n=>row(esc(n)+' · '+st[n].n+' lần',fmtH(st[n].h))).join('')+'</div>':'<p class="hint">Chưa có ca nào được gán.</p>';
-  return banners()+monthNav()+(p.custom?'<p class="hint" style="text-align:center">Kỳ lương '+p.label+'</p>':'')+
-    '<div class="card"><h2>Chi tiết thực nhận</h2><div class="rows">'+
+  const detail='<div class="rows">'+
     row('Tổng giờ làm',fmtH(t.h))+row('Tiền giờ (đã nhân hệ số)','+ '+fmt(t.base))+
     row('Phụ trội thêm ca và ngày lễ','+ '+fmt(t.add),'pos')+row('Thưởng','+ '+fmt(t.bonus),'pos')+
     row('Phạt đi trễ','− '+fmt(t.late),t.late?'neg':'')+row('Bỏ ca','− '+fmt(t.skip),t.skip?'neg':'')+row('Trừ khác và tạm ứng','− '+fmt(t.ded),t.ded?'neg':'')+
-    '<div class="r tot"><span>Thực nhận</span><span>'+fmt(t.net)+'</span></div></div></div>'+
-    '<div class="card"><h2>Theo tuần</h2>'+weeks+'</div>'+
-    '<div class="card"><h2>Giờ theo ca</h2>'+byShift+'</div>'+
-    '<div class="card"><h2>Gửi bảng công</h2><p class="hint">Sao chép bảng công của kỳ này thành tin nhắn để gửi quản lý hoặc lưu lại.</p><div class="btns"><button class="btn" data-act="sumMake">Tạo bảng công</button><button class="btn" data-act="sumCopy" id="sumCopy" hidden>Sao chép</button></div><textarea id="sum" readonly hidden></textarea></div>'+
-    '<h2 style="font-size:17px">Từng ngày</h2><div class="daylist">'+list+'</div>';
+    '<div class="r tot"><span>Thực nhận dự tính</span><span>'+fmt(t.net)+'</span></div>'+
+    row('Trong đó đã làm',fmt(t.done.net)+' · '+t.done.n+' ngày')+row('Trong đó đã xếp lịch',fmt(t.plan.net)+' · '+t.plan.n+' ngày')+'</div>';
+  const sum='<p class="hint">Sao chép bảng công của kỳ này thành tin nhắn để gửi quản lý hoặc lưu lại.</p><div class="btns"><button class="btn" data-act="sumMake">Tạo bảng công</button><button class="btn" data-act="sumCopy" id="sumCopy" hidden>Sao chép</button></div><textarea id="sum" readonly hidden></textarea>';
+  return banners()+monthNav()+(p.custom?'<p class="hint" style="text-align:center">Kỳ lương '+p.label+'</p>':'')+
+    fold('det','Chi tiết thực nhận',detail)+
+    fold('days','Từng ngày ('+keys.length+')','<div class="daylist">'+list+'</div>')+
+    fold('wk','Theo tuần',weeks)+
+    fold('sh','Giờ theo ca',byShift)+
+    fold('sum','Gửi bảng công',sum);
 }
 function shiftView(){
   const e=shiftEdit&&shiftEdit!=='new'?S.shifts.find(s=>s.id===shiftEdit):null;
@@ -404,15 +468,30 @@ function renderMulti(){
 }
 function render(){
   renderTabs();renderHero();
-  $('#view').innerHTML={cal:calView,pay:payView,shift:shiftView,set:setView}[view.tab]();
+  const v=$('#view');
+  v.innerHTML={cal:calView,pay:payView,shift:shiftView,set:setView}[view.tab]();
+  if(view.anim){view.anim=false;v.classList.remove('fade');void v.offsetWidth;v.classList.add('fade')}
   renderMulti();
 }
 
 /* ---------- bảng ngày ---------- */
+function adjCount(d){
+  let n=0;
+  if((d.mult||1)!==1)n++;
+  if(money(d.late))n++;
+  if(money(d.bonus))n++;
+  if(d.skip)n++;
+  if(money(d.ot))n++;
+  if(money(d.hol))n++;
+  if(money(d.deduct))n++;
+  if(money(d.rate)!==S.settings.rate)n++;
+  return n;
+}
 function openDay(k){
   const d=S.days[k];openKey=k;
   draft=d?{ids:(d.shiftIds||[]).slice(),extras:(d.extras||[]).map(x=>Object.assign({},x)),manual:d.hours!=null,hours:d.hours!=null?fmtN(d.hours):'',skip:!!d.skip,mult:d.mult||1,late:d.late||'',bonus:d.bonus||'',rate:d.rate!=null?d.rate:S.settings.rate,ot:d.ot||'',hol:d.hol||'',deduct:d.deduct||'',note:d.note||''}
     :{ids:[],extras:[],manual:false,hours:'',skip:false,mult:1,late:'',bonus:'',rate:S.settings.rate,ot:'',hol:'',deduct:'',note:''};
+  draft.adv=adjCount(draft)>0;
   pend.del=false;
   renderSheet();$('#sheet').hidden=false;$('#sheetBody').scrollTop=0;
 }
@@ -428,6 +507,7 @@ function prevDay(){
   return p&&((p.shiftIds&&p.shiftIds.length)||(p.extras&&p.extras.length))?p:null;
 }
 function renderSheet(){
+  const isPlan=openKey>dk(now);
   const chips=S.shifts.length?S.shifts.map(s=>'<button class="chip'+(draft.ids.indexOf(s.id)>=0?' on':'')+'" data-act="tog" data-id="'+s.id+'">'+esc(s.name)+'<small>'+s.start+'–'+s.end+'</small></button>').join(''):'<p class="hint">Chưa có ca. Tạo ca ở tab Ca làm hoặc nhập giờ trực tiếp.</p>';
   const ex=draft.extras.map((x,i)=>'<div class="xrow"><div class="hd"><span>'+(x.type==='sub'?'Ca làm thay':'Ca phát sinh')+'</span><button class="btn bad" style="min-height:36px;padding:0 10px" data-act="rmx" data-i="'+i+'">Bỏ</button></div>'+
     '<div class="three"><label class="f">Bắt đầu<input type="time" data-xi="'+i+'" data-xf="start" value="'+x.start+'"></label><label class="f">Kết thúc<input type="time" data-xi="'+i+'" data-xf="end" value="'+x.end+'"></label><label class="f">Nghỉ (phút)<input type="tel" inputmode="numeric" data-xi="'+i+'" data-xf="brk" value="'+(+x.brk||0)+'"></label></div></div>').join('');
@@ -435,22 +515,24 @@ function renderSheet(){
   const f=(id,lab,val,ph)=>'<label class="f">'+lab+'<input type="tel" inputmode="numeric" data-f="'+id+'" value="'+esc(val)+'" placeholder="'+(ph||'0')+'"></label>';
   const mult=[1,1.5,2,3].map(v=>'<button class="chip mult'+(draft.mult===v?' on':'')+'" data-act="mult" data-v="'+v+'">×'+fmtN(v)+'</button>').join('');
   const hasPrev=!!prevDay();
-  $('#sheetIn').innerHTML=
-    '<div class="phead"><h2>'+fmtDate(openKey)+'</h2><button class="iconbtn" data-act="close" aria-label="Đóng">×</button></div>'+
-    '<h3>Chọn ca có sẵn để thêm vào ngày</h3><div class="chips">'+chips+'</div>'+
-    '<div class="btns"><button class="btn" data-act="addx" data-type="extra">+ Ca phát sinh</button><button class="btn" data-act="addx" data-type="sub">+ Ca làm thay</button>'+(hasPrev?'<button class="btn" data-act="copyPrev">Giống hôm trước</button>':'')+'</div>'+ex+warnHTML()+
-    '<label class="f">Tổng số giờ tính lương (sửa được)<input type="text" inputmode="decimal" data-f="hours" id="f-hours" value="'+(draft.manual?esc(draft.hours):fmtN(ah))+'"></label>'+
-    '<p class="hint" id="hhint">Thêm, sửa hoặc xoá ca sẽ tự tính lại tổng giờ. Không chọn ca thì nhập giờ trực tiếp.</p>'+
-    (draft.manual?'<div class="btns"><button class="btn" data-act="autoh">Tính lại từ ca</button></div>':'')+
-    '<h3>Hệ số nhân tiền giờ</h3><div class="chips">'+mult+'</div><p class="hint">Ví dụ ngày lễ ×3. Nếu quán tính phụ trội riêng thì để ×1 và nhập ở ô phụ trội bên dưới.</p>'+
+  const adj=adjCount(draft);
+  const ADV='<h3>Hệ số nhân tiền giờ</h3><div class="chips">'+mult+'</div><p class="hint">Ví dụ ngày lễ ×3. Nếu quán tính phụ trội riêng thì để ×1 và nhập ở ô phụ trội.</p>'+
     '<div class="two">'+f('late','Phạt đi trễ',draft.late)+f('bonus','Tiền thưởng',draft.bonus)+'</div>'+
     '<label class="check"><input type="checkbox" data-f="skip"'+(draft.skip?' checked':'')+'><span>Bỏ ca · trừ '+S.settings.skipPen.toLocaleString('vi-VN')+' '+esc(S.settings.cur)+'</span></label>'+
-    '<h3>Điều chỉnh tiền và ghi chú ngày</h3>'+
     '<div class="two">'+f('rate','Lương giờ ngày này',draft.rate)+f('ot','Tiền phụ trội thêm ca',draft.ot)+f('hol','Tiền phụ trội ngày lễ',draft.hol)+f('deduct','Trừ khác / tạm ứng',draft.deduct)+'</div>'+
-    '<label class="f">Ghi chú chung<textarea data-f="note" placeholder="Ví dụ: đổi ca với bạn, ngày lễ...">'+esc(draft.note)+'</textarea></label>'+
-    '<p class="hint">Giờ ca phát sinh và làm thay đã cộng vào tổng giờ. Chỉ nhập phần tiền phụ trội để tránh tính hai lần. Bỏ ca không tự xoá giờ đã làm ở ca khác.</p>'+
-    '<div class="preview"><div><span>Thực nhận ngày này</span><small class="hint" id="pvh"></small></div><strong id="pv"></strong></div>'+
-    '<div class="btns"><button class="btn pri" data-act="saveDay">Lưu ngày công</button>'+(S.days[openKey]?'<button class="btn bad" data-act="delDay">'+(pend.del?'Chạm lại để xoá':'Xoá ngày công')+'</button>':'')+'<button class="btn" data-act="close">Đóng</button></div>';
+    '<p class="hint">Giờ ca phát sinh và làm thay đã cộng vào tổng giờ. Chỉ nhập phần tiền phụ trội để tránh tính hai lần. Bỏ ca không tự xoá giờ đã làm ở ca khác.</p>';
+  $('#sheetHead').innerHTML='<div class="phead"><h2>'+fmtDate(openKey)+(isPlan?'<span class="tag">Dự kiến</span>':'')+'</h2><button class="iconbtn" data-act="close" aria-label="Đóng">×</button></div>';
+  $('#sheetIn').innerHTML=
+    '<h3>Chọn ca</h3><div class="chips">'+chips+'</div>'+
+    '<div class="btns"><button class="btn" data-act="addx" data-type="extra">+ Ca phát sinh</button><button class="btn" data-act="addx" data-type="sub">+ Ca làm thay</button>'+(hasPrev?'<button class="btn" data-act="copyPrev">Giống hôm trước</button>':'')+'</div>'+ex+warnHTML()+
+    '<label class="f">Tổng số giờ tính lương (sửa được)<input type="text" inputmode="decimal" data-f="hours" id="f-hours" value="'+(draft.manual?esc(draft.hours):fmtN(ah))+'"></label>'+
+    '<p class="hint" id="hhint">Tự tính từ ca. Không chọn ca thì nhập giờ trực tiếp.</p>'+
+    (draft.manual?'<div class="btns"><button class="btn" data-act="autoh">Tính lại từ ca</button></div>':'')+
+    '<label class="f">Ghi chú<textarea class="note" data-f="note" placeholder="Ví dụ: đổi ca với bạn, ngày lễ...">'+esc(draft.note)+'</textarea></label>'+
+    '<button class="advbtn" data-act="adv" aria-expanded="'+(draft.adv?'true':'false')+'"><span>Điều chỉnh tiền, hệ số, phạt, thưởng</span><span class="rt">'+(adj?'<span class="badge">'+adj+'</span>':'')+'<span class="chev"></span></span></button>'+
+    (draft.adv?ADV:'');
+  $('#sheetFoot').innerHTML='<div class="preview"><div><span>Thực nhận ngày này</span><small class="hint" id="pvh"></small></div><strong id="pv"></strong></div>'+
+    '<div class="btns"><button class="btn pri" data-act="saveDay">Lưu ngày công</button>'+(S.days[openKey]?'<button class="btn bad" data-act="delDay">'+(pend.del?'Chạm lại để xoá':'Xoá')+'</button>':'')+'</div>';
   updatePreview();
 }
 function updatePreview(){
@@ -464,6 +546,36 @@ function refreshCalc(){
   updatePreview();
 }
 function closeSheet(){$('#sheet').hidden=true;draft=null;openKey=null;render()}
+function closeQP(){$('#qsheet').hidden=true}
+function qpDates(){
+  const p=period(view.y,view.m),n0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  let a=parseK(p.a);const b=parseK(p.b);
+  if(qs.scope==='rest'&&n0>a)a=n0;
+  const keys=[],d=new Date(a);
+  for(;d<=b;d.setDate(d.getDate()+1)){
+    const k=dk(d);
+    if(qs.dows.has(d.getDay())&&(qs.over||!S.days[k]))keys.push(k);
+  }
+  return keys;
+}
+function renderQP(){
+  const keys=qpDates(),p=period(view.y,view.m);
+  const hrs=qs.ids.reduce((a,id)=>{const s=S.shifts.find(x=>x.id===id);return a+(s?dur(s):0)},0);
+  const est=keys.length*hrs*S.settings.rate;
+  const chips=S.shifts.length?S.shifts.map(s=>'<button class="chip'+(qs.ids.indexOf(s.id)>=0?' on':'')+'" data-act="qtog" data-id="'+s.id+'">'+esc(s.name)+'<small>'+s.start+'–'+s.end+'</small></button>').join(''):'<p class="hint">Chưa có ca. Tạo ca ở tab Ca làm trước.</p>';
+  const dows=[1,2,3,4,5,6,0].map(d=>'<button class="chip'+(qs.dows.has(d)?' on':'')+'" data-act="qdow" data-d="'+d+'">'+DOWS[d]+'</button>').join('');
+  const scope=[['rest','Từ hôm nay đến hết kỳ'],['all','Cả kỳ đang xem']].map(x=>'<button class="chip mult'+(qs.scope===x[0]?' on':'')+'" data-act="qscope" data-v="'+x[0]+'">'+x[1]+'</button>').join('');
+  $('#qHead').innerHTML='<div class="phead"><h2>Xếp lịch nhanh</h2><button class="iconbtn" data-act="qclose" aria-label="Đóng">×</button></div>';
+  $('#qIn').innerHTML=
+    '<p class="hint">Chọn ca và các thứ trong tuần, app xếp luôn cả loạt ngày. Ngày xếp trước hiện viền nét đứt trên lịch và chỉ tính vào số dự tính.</p>'+
+    '<h3>Ca làm</h3><div class="chips">'+chips+'</div>'+
+    '<h3>Lặp vào các thứ</h3><div class="dowrow">'+dows+'</div>'+
+    '<div class="btns"><button class="btn" data-act="qpre" data-p="all">Cả tuần</button><button class="btn" data-act="qpre" data-p="wk">Th 2 – Th 6</button><button class="btn" data-act="qpre" data-p="we">Cuối tuần</button></div>'+
+    '<h3>Phạm vi · '+(p.custom?'kỳ '+p.label:'tháng '+(view.m+1)+'/'+view.y)+'</h3><div class="chips">'+scope+'</div>'+
+    '<label class="check"><input type="checkbox" data-q="over"'+(qs.over?' checked':'')+'><span>Ghi đè ngày đã có lịch (giữ nguyên ghi chú và tiền điều chỉnh)</span></label>';
+  $('#qFoot').innerHTML='<div class="preview"><div><span>Sẽ xếp cho '+keys.length+' ngày</span><small class="hint">'+(qs.ids.length?fmtN(hrs)+' giờ mỗi ngày · ước tính chưa tính hệ số':'Chọn ít nhất một ca')+'</small></div><strong>'+fmt(est)+'</strong></div>'+
+    '<div class="btns"><button class="btn pri" data-act="qapply"'+(qs.ids.length&&keys.length?'':' disabled')+'>Xếp lịch</button></div>';
+}
 
 /* ---------- sự kiện ---------- */
 function copyText(txt,ta){
@@ -476,13 +588,28 @@ function summaryText(){
   const L=['Bảng công '+(p.custom?'kỳ '+p.label:'tháng '+(view.m+1)+'/'+view.y)];
   keys.forEach(k=>{
     const d=S.days[k],c=calc(d),dt=parseK(k),names=dayShifts(d).map(s=>s.name).join(' + ');
-    L.push(pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+' ('+DOWS[dt.getDay()]+'): '+fmtN(c.h)+' giờ'+(c.mult!==1?' ×'+fmtN(c.mult):'')+(names?' · '+names:'')+' · '+fmt(c.net)+(d.note?' · '+d.note:''));
+    L.push(pad(dt.getDate())+'/'+pad(dt.getMonth()+1)+' ('+DOWS[dt.getDay()]+'): '+fmtN(c.h)+' giờ'+(c.mult!==1?' ×'+fmtN(c.mult):'')+(names?' · '+names:'')+' · '+fmt(c.net)+(k>dk(now)?' (dự kiến)':'')+(d.note?' · '+d.note:''));
   });
   L.push('','Tổng: '+fmtH(t.h)+' · '+t.n+' ngày · Thực nhận '+fmt(t.net));
   return L.join('\n');
 }
 const A={
-  tab(t){view.tab=t.dataset.t;pend={};render();window.scrollTo(0,0)},
+  tab(t){scrollPos[view.tab]=window.scrollY;view.tab=t.dataset.t;pend={};view.anim=true;render();window.scrollTo(0,scrollPos[view.tab]||0)},
+  fold(t){const id=t.dataset.id;view.fold[id]=!view.fold[id];render()},
+  adv(){draft.adv=!draft.adv;renderSheet()},
+  qp(){qs.ids=qs.ids.filter(id=>S.shifts.some(s=>s.id===id));renderQP();$('#qsheet').hidden=false;$('#qBody').scrollTop=0},
+  qclose(){closeQP()},
+  qtog(t){const id=t.dataset.id,i=qs.ids.indexOf(id);if(i>=0)qs.ids.splice(i,1);else qs.ids.push(id);renderQP()},
+  qdow(t){const d=+t.dataset.d;if(qs.dows.has(d))qs.dows.delete(d);else qs.dows.add(d);renderQP()},
+  qpre(t){const p=t.dataset.p;qs.dows=new Set(p==='all'?[0,1,2,3,4,5,6]:p==='wk'?[1,2,3,4,5]:[6,0]);renderQP()},
+  qscope(t){qs.scope=t.dataset.v;renderQP()},
+  qapply(){
+    const keys=qpDates();
+    if(!qs.ids.length||!keys.length)return;
+    const un=snap(keys);
+    keys.forEach(k=>{const d=S.days[k]||newDay();d.shiftIds=qs.ids.slice();d.hours=null;S.days[k]=d});
+    save();buzz();closeQP();render();toast('Đã xếp lịch cho '+keys.length+' ngày',()=>{un()});
+  },
   prev(){view.m--;if(view.m<0){view.m=11;view.y--}render()},
   next(){view.m++;if(view.m>11){view.m=0;view.y++}render()},
   today(){view.y=now.getFullYear();view.m=now.getMonth();render()},
@@ -499,7 +626,7 @@ const A={
     if(!multi.ids.length){toast('Chọn ít nhất một ca để gán');return}
     const keys=Array.from(multi.sel),un=snap(keys);
     keys.forEach(k=>{const d=S.days[k]||newDay();d.shiftIds=multi.ids.slice();d.hours=null;S.days[k]=d});
-    save();multi.sel.clear();render();toast('Đã gán ca cho '+keys.length+' ngày',()=>{un()});
+    save();buzz();multi.sel.clear();render();toast('Đã gán ca cho '+keys.length+' ngày',()=>{un()});
   },
   mclear(){
     if(!multi.sel.size){toast('Chạm vào các ngày cần xoá trước');return}
@@ -520,7 +647,7 @@ const A={
     const d=draftDay(),un=snap([openKey]);
     const empty=!d.shiftIds.length&&!d.extras.length&&d.hours==null&&!d.late&&!d.bonus&&!d.skip&&!d.ot&&!d.hol&&!d.deduct&&!d.note;
     if(empty)delete S.days[openKey];else S.days[openKey]=d;
-    save();closeSheet();toast(empty?'Ngày trống nên không lưu':'Đã lưu ngày công',empty?null:un);
+    save();buzz();closeSheet();toast(empty?'Ngày trống nên không lưu':'Đã lưu ngày công',empty?null:un);
   },
   delDay(){
     if(!pend.del){pend.del=true;renderSheet();return}
@@ -576,12 +703,14 @@ const A={
 };
 document.addEventListener('click',e=>{
   if(e.target.id==='sheet'){closeSheet();return}
+  if(e.target.id==='qsheet'){closeQP();return}
   const t=e.target.closest('[data-act]');
   if(!t)return;
   const f=A[t.dataset.act];if(f)f(t,e);
 });
 document.addEventListener('input',e=>{
   const el=e.target;
+  if(el.dataset.q==='over'){qs.over=el.checked;renderQP();return}
   if(draft&&el.dataset.f){
     const f=el.dataset.f;
     if(f==='skip')draft.skip=el.checked;
@@ -601,7 +730,13 @@ document.addEventListener('change',e=>{
     const r=new FileReader();r.onload=()=>{$('#restore').value=String(r.result||'')};r.readAsText(e.target.files[0]);
   }
 });
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#sheet').hidden)closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!$('#qsheet').hidden)closeQP();else if(!$('#sheet').hidden)closeSheet()});
+/* mở lại app sau nhiều ngày: cập nhật hôm nay */
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  const n=new Date();
+  if(dk(n)!==dk(now)){now=n;view.y=n.getFullYear();view.m=n.getMonth();if(!draft)render()}
+});
 
 /* ---------- cài ra màn hình chính ---------- */
 let deferredPrompt=null;
@@ -632,6 +767,9 @@ $('#view').addEventListener('touchend',e=>{
   const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
   if(Math.abs(dx)>70&&Math.abs(dy)<45){if(dx<0)A.next();else A.prev()}
 },{passive:true});
+if('IntersectionObserver' in window){
+  new IntersectionObserver(es=>{const e=es[es.length-1];pastHero=!e.isIntersecting&&e.boundingClientRect.bottom<=0;syncMini()}).observe($('#hero'));
+}
 render();
 })();
 </script>
