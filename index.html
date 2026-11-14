@@ -273,23 +273,73 @@ function seed(){
   for(let i=1;i<now.getDate()&&i<=14;i++){
     const w=new Date(y,m,i).getDay();
     if(w===1)continue;
-    o.days[dkey(y,m,i)]={shiftIds:i%3===0?[a,b]:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:i===5?20000:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
+    o.days[dkey(y,m,i)]={demo:1,shiftIds:i%3===0?[a,b]:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:i===5?20000:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
   }
   for(let i=now.getDate();i<=Math.min(new Date(y,m+1,0).getDate(),now.getDate()+5);i++){
     const w=new Date(y,m,i).getDay();
     if(w===1)continue;
-    o.days[dkey(y,m,i)]={shiftIds:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
+    o.days[dkey(y,m,i)]={demo:1,shiftIds:[c],extras:[],hours:null,rate:30000,mult:w===0?1.5:1,late:0,bonus:0,skip:false,ot:0,hol:0,deduct:0,note:''};
   }
   return o;
 }
+const BKKEY='nau-so-cong-bk',LASTBK='nau-so-cong-lastbk',FIRSTKEY='nau-so-cong-first',BADKEY='nau-so-cong-bad';
+let freshSeed=false;
+function valid(o){return !!(o&&typeof o==='object'&&Array.isArray(o.shifts)&&o.days&&typeof o.days==='object'&&o.settings)}
+function norm(o){
+  o.settings.goal=o.settings.goal||0;o.settings.cut=o.settings.cut||0;
+  if(o.settings.skipPen==null)o.settings.skipPen=70000;
+  if(!o.settings.cur)o.settings.cur='đ';
+  o.demo=!!o.demo;
+  if(o.demo&&!Object.keys(o.days).length)o.demo=false;
+  return o;
+}
+const dayCount=o=>o&&o.days?Object.keys(o.days).length:0;
+const isPureDemo=o=>!!o&&dayCount(o)>0&&Object.keys(o.days).every(k=>o.days[k]&&o.days[k].demo);
 function load(){
-  try{
-    const r=localStorage.getItem(KEY);
-    if(r){const o=JSON.parse(r);if(o&&Array.isArray(o.shifts)&&o.days&&o.settings){o.settings.goal=o.settings.goal||0;o.settings.cut=o.settings.cut||0;if(o.settings.skipPen==null)o.settings.skipPen=70000;if(!o.settings.cur)o.settings.cur='đ';return o}}
-  }catch(e){}
+  let raw=null;
+  try{raw=localStorage.getItem(KEY)}catch(e){}
+  if(raw){
+    try{const o=JSON.parse(raw);if(valid(o))return norm(o)}catch(e){}
+    try{localStorage.setItem(BADKEY,raw)}catch(e){}
+  }
+  freshSeed=true;
   return seed();
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storeOK=false}}
+function getBk(){try{const b=JSON.parse(localStorage.getItem(BKKEY)||'[]');return Array.isArray(b)?b:[]}catch(e){return[]}}
+function putBk(b){
+  for(let n=b.length;n>=1;n=Math.floor(n/2)){
+    try{localStorage.setItem(BKKEY,JSON.stringify(b.slice(0,n)));return}catch(e){}
+  }
+}
+function pushBk(raw,p){
+  try{
+    p=p||JSON.parse(raw);
+    if(!valid(p)||!dayCount(p)||isPureDemo(p))return;
+    const b=getBk();
+    if(b[0]&&b[0].d===raw)return;
+    b.unshift({t:Date.now(),n:dayCount(p),d:raw});
+    putBk(b.slice(0,10));
+  }catch(e){}
+}
+function safeSnap(){try{pushBk(JSON.stringify(S))}catch(e){}}
+function autoSnap(){
+  try{
+    const prev=localStorage.getItem(KEY);if(!prev)return;
+    const p=JSON.parse(prev);if(!valid(p)||!dayCount(p)||isPureDemo(p))return;
+    const b=getBk(),last=b[0];
+    if(!last||Date.now()-last.t>30*60000||dayCount(p)>dayCount(S)+2)pushBk(prev,p);
+  }catch(e){}
+}
+function idb(cb){try{const r=indexedDB.open('nau-so-cong',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>cb(r.result);r.onerror=()=>cb(null)}catch(e){cb(null)}}
+function idbPut(v){idb(db=>{if(!db)return;try{db.transaction('kv','readwrite').objectStore('kv').put(v,'main')}catch(e){}})}
+function idbGet(cb){idb(db=>{if(!db)return cb(null);try{const q=db.transaction('kv').objectStore('kv').get('main');q.onsuccess=()=>cb(q.result||null);q.onerror=()=>cb(null)}catch(e){cb(null)}})}
+function save(){
+  autoSnap();
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){storeOK=false}
+  if(dayCount(S)&&!isPureDemo(S))idbPut(JSON.stringify(S));
+}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+try{if(!localStorage.getItem(FIRSTKEY))localStorage.setItem(FIRSTKEY,String(Date.now()))}catch(e){}
 let S=load();
 let view={tab:'cal',y:now.getFullYear(),m:now.getMonth(),fold:{det:true,days:true,wk:false,sh:false,sum:false},anim:true,flash:null};
 let scrollPos={},heroOn=false,pastHero=false,lastBig=null;
@@ -427,7 +477,19 @@ function monthNav(){
 function banners(){
   let h='';
   if(!storeOK)h+='<div class="banner"><span>Trình duyệt đang chặn lưu dữ liệu, nên thay đổi sẽ mất khi đóng trang. Vào Cài đặt để sao lưu thường xuyên.</span></div>';
-  if(S.demo)h+='<div class="banner"><span>Đang là dữ liệu mẫu để xem thử cách hoạt động. Xoá đi trước khi ghi công thật.</span><div class="btns"><button class="btn" data-act="clearDemo">Xoá dữ liệu mẫu</button></div></div>';
+  if(S.demo){
+    const ks=Object.keys(S.days),fl=ks.filter(k=>S.days[k]&&S.days[k].demo).length;
+    const lab=fl?'Xoá dữ liệu mẫu ('+fl+' ngày)':(pend.cd?'Chạm lại để xoá '+ks.length+' ngày':'Xoá dữ liệu mẫu');
+    h+='<div class="banner"><span>Đang là dữ liệu mẫu để xem thử cách hoạt động. '+(fl?'Chỉ xoá các ngày mẫu, ngày ông tự nhập được giữ lại.':'Có thể gồm cả ngày ông đã nhập, nên phải chạm hai lần.')+'</span><div class="btns"><button class="btn" data-act="clearDemo">'+lab+'</button></div></div>';
+  }
+  try{
+    const real=Object.keys(S.days).filter(k=>!(S.days[k]&&S.days[k].demo)).length;
+    if(real>=5){
+      const ref=+localStorage.getItem(LASTBK)||+localStorage.getItem(FIRSTKEY)||Date.now();
+      const dd=Math.floor((Date.now()-ref)/864e5);
+      if(dd>=10)h+='<div class="banner"><span>Đã '+dd+' ngày chưa sao lưu JSON. Sao lưu một bản để khỏi mất công ghi.</span><div class="btns"><button class="btn" data-act="goBk">Sao lưu ngay</button></div></div>';
+    }
+  }catch(e){}
   return h;
 }
 function calView(){
@@ -518,9 +580,17 @@ function setView(){
     '<div class="card"><h2>Sao lưu</h2><p class="hint">Dữ liệu chỉ nằm trong trình duyệt này, chưa đồng bộ giữa các máy. Trang này không tải được file, nên bản sao lưu hiện thành văn bản để sao chép và dán vào ghi chú hoặc tin nhắn cho chính mình.</p>'+
     '<div class="btns"><button class="btn" data-act="bkMake">Tạo bản sao lưu JSON</button><button class="btn" data-act="csvMake">Tạo CSV kèm ca và ghi chú</button></div>'+
     '<textarea id="out" placeholder="Bản sao lưu hoặc CSV sẽ hiện ở đây" readonly hidden></textarea><div class="btns"><button class="btn" data-act="copyOut" id="copyOut" hidden>Sao chép</button></div></div>'+
-    '<div class="card"><h2>Khôi phục</h2><p class="hint">Dán bản JSON đã sao lưu, hoặc chọn file .json nếu có.</p>'+
+    autoBkCard()+'<div class="card"><h2>Khôi phục</h2><p class="hint">Dán bản JSON đã sao lưu, hoặc chọn file .json nếu có.</p>'+
     '<textarea id="restore" placeholder="Dán JSON vào đây"></textarea><input type="file" id="restoreFile" accept=".json,application/json">'+
     '<div class="btns"><button class="btn bad" data-act="bkRestore">'+(pend.restore?'Chạm lại để ghi đè dữ liệu hiện tại':'Khôi phục JSON')+'</button></div></div>';
+}
+function fmtT(t){const d=new Date(t);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
+function autoBkCard(){
+  const b=getBk();
+  let h='<div class="card"><h2>Bản tự lưu trong máy</h2><p class="hint">App tự giữ vài bản dự phòng mỗi khi có thay đổi. Chạm Khôi phục để quay về bản đó, dữ liệu hiện tại cũng được cất lại trước khi thay.</p>';
+  if(!b.length)h+='<p class="hint">Chưa có bản nào.</p>';
+  else h+=b.map((x,i)=>'<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line,#e4d6c3)"><span>'+fmtT(x.t)+' · '+x.n+' ngày</span><button class="btn" data-act="abRestore" data-i="'+i+'">'+(pend['ab'+i]?'Chạm lại để khôi phục':'Khôi phục')+'</button></div>').join('');
+  return h+'</div>';
 }
 function renderMulti(){
   const el=$('#multibar');
@@ -671,7 +741,7 @@ const A={
     const keys=qpDates();
     if(!qs.ids.length||!keys.length)return;
     const un=snap(keys);
-    keys.forEach(k=>{const d=S.days[k]||newDay();d.shiftIds=qs.ids.slice();d.hours=null;S.days[k]=d});
+    keys.forEach(k=>{const d=S.days[k]||newDay();delete d.demo;d.shiftIds=qs.ids.slice();d.hours=null;S.days[k]=d});
     save();buzz();closeQP();render();toast('Đã xếp lịch cho '+keys.length+' ngày',()=>{un()});
   },
   prev(){view.m--;if(view.m<0){view.m=11;view.y--}view.anim=true;render()},
@@ -697,7 +767,7 @@ const A={
     if(!multi.sel.size){toast('Chạm vào các ngày cần gán trước');return}
     if(!multi.ids.length){toast('Chọn ít nhất một ca để gán');return}
     const keys=Array.from(multi.sel),un=snap(keys);
-    keys.forEach(k=>{const d=S.days[k]||newDay();d.shiftIds=multi.ids.slice();d.hours=null;S.days[k]=d});
+    keys.forEach(k=>{const d=S.days[k]||newDay();delete d.demo;d.shiftIds=multi.ids.slice();d.hours=null;S.days[k]=d});
     save();buzz();multi.sel.clear();render();toast('Đã gán ca cho '+keys.length+' ngày',()=>{un()});
   },
   mclear(){
@@ -718,7 +788,7 @@ const A={
   saveDay(){
     const d=draftDay(),un=snap([openKey]);
     const empty=!d.shiftIds.length&&!d.extras.length&&d.hours==null&&!d.late&&!d.bonus&&!d.skip&&!d.ot&&!d.hol&&!d.deduct&&!d.note;
-    if(empty)delete S.days[openKey];else S.days[openKey]=d;
+    if(empty)delete S.days[openKey];else{delete d.demo;S.days[openKey]=d}
     save();buzz();view.flash=empty?null:openKey;closeSheet();toast(empty?'Ngày trống nên không lưu':'Đã lưu ngày công',empty?null:un);
   },
   delDay(){
@@ -751,7 +821,7 @@ const A={
     S.settings.cut=Math.min(28,Math.max(0,money($('#st-cut').value)));
     save();toast('Đã lưu cài đặt');render();
   },
-  bkMake(){const o=$('#out');o.value=JSON.stringify(S);o.hidden=false;$('#copyOut').hidden=false;toast('Bản sao lưu đã sẵn sàng')},
+  bkMake(){try{localStorage.setItem(LASTBK,String(Date.now()))}catch(e){}const o=$('#out');o.value=JSON.stringify(S);o.hidden=false;$('#copyOut').hidden=false;toast('Bản sao lưu đã sẵn sàng')},
   csvMake(){
     const rows=[['Ngày','Ca','Giờ','Lương giờ','Hệ số','Tiền giờ','Phụ trội thêm ca','Phụ trội ngày lễ','Thưởng','Phạt đi trễ','Trừ khác','Bỏ ca','Thực nhận','Ghi chú']];
     Object.keys(S.days).sort().forEach(k=>{
@@ -769,9 +839,22 @@ const A={
     if(!o||!Array.isArray(o.shifts)||typeof o.days!=='object'||!o.settings){toast('Không đúng định dạng bản sao lưu');return}
     if(!pend.restore){pend.restore=true;const raw=JSON.stringify(o);render();$('#restore').value=raw;return}
     o.settings.goal=o.settings.goal||0;o.settings.cut=o.settings.cut||0;if(o.settings.skipPen==null)o.settings.skipPen=70000;if(!o.settings.cur)o.settings.cur='đ';
-    S=o;S.demo=!!o.demo;pend={};save();toast('Đã khôi phục dữ liệu');render();
+    safeSnap();S=norm(o);pend={};save();toast('Đã khôi phục dữ liệu');render();
   },
-  clearDemo(){S.days={};S.demo=false;save();toast('Đã xoá dữ liệu mẫu');render()}
+  clearDemo(){
+    const ks=Object.keys(S.days),fl=ks.filter(k=>S.days[k]&&S.days[k].demo);
+    if(fl.length){safeSnap();fl.forEach(k=>delete S.days[k])}
+    else if(ks.length){if(!pend.cd){pend={cd:true};render();return}safeSnap();S.days={}}
+    S.demo=false;pend={};save();toast('Đã xoá dữ liệu mẫu');render();
+  },
+  goBk(){view.tab='set';pend={};render();A.bkMake();const o=$('#out');if(o&&o.scrollIntoView)o.scrollIntoView({block:'center'})},
+  abRestore(t){
+    const i=+t.dataset.i,b=getBk()[i];if(!b)return;
+    if(!pend['ab'+i]){pend={};pend['ab'+i]=true;render();return}
+    let o;try{o=JSON.parse(b.d)}catch(e){toast('Bản này bị lỗi');return}
+    if(!valid(o)){toast('Bản này bị lỗi');return}
+    safeSnap();S=norm(o);pend={};save();toast('Đã khôi phục bản '+fmtT(b.t));render();
+  }
 };
 document.addEventListener('click',e=>{
   if(e.target.id==='sheet'){closeSheet();return}
@@ -815,7 +898,7 @@ let deferredPrompt=null;
 const standalone=()=>(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;if(view.tab==='set')render()});
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;toast('Đã cài ra màn hình chính');render()});
-const APP_VER='24/10/2026 · v3';
+const APP_VER='14/11/2026 · v4';
 function versionCard(){
   return '<div class="card"><h2>Phiên bản</h2><p class="hint">Bản '+APP_VER+'. Nếu thấy chưa giống bản mới thì bấm kiểm tra cập nhật, app sẽ xoá bộ nhớ tạm và tải lại.</p><div class="btns"><button class="btn" data-act="upd">Kiểm tra cập nhật</button></div></div>';
 }
@@ -855,6 +938,15 @@ if('IntersectionObserver' in window){
   new IntersectionObserver(es=>{const e=es[es.length-1];pastHero=!e.isIntersecting&&e.boundingClientRect.bottom<=0;syncMini()}).observe($('#hero'));
 }
 render();
+if(freshSeed){idbGet(raw=>{
+  try{
+    if(!raw||!isPureDemo(S)&&S.demo===false)return;
+    const o=JSON.parse(raw);
+    if(!valid(o)||!dayCount(o)||isPureDemo(o))return;
+    if(!(S.demo&&isPureDemo(S)))return;
+    S=norm(o);save();toast('Đã tự khôi phục dữ liệu từ bộ nhớ dự phòng');render();
+  }catch(e){}
+})}
 })();
 </script>
 <script>
